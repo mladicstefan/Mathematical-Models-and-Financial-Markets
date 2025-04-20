@@ -6,6 +6,11 @@ from typing import Union, List, Optional
 
 
 @dataclass
+class IndicatorData:
+    data: Union[YFData, BinanceData]
+
+
+@dataclass
 class DataParameters:
     asset: str
     timeframe: str

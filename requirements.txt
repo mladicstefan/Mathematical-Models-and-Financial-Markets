@@ -1,0 +1,4 @@
+yfinance>=0.2.18
+python-binance>=1.0.16
+pandas>=1.5.0
+#vectorbtpro liscence required to install it

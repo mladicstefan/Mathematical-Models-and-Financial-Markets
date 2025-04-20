@@ -16,14 +16,17 @@ class DataParameters:
 @dataclass
 class BacktestParameters:
     data: Union[YFData, BinanceData]
+
     longEntry: List[bool]
     shortEntry: Optional[List[bool]]
     longExit: Optional[List[bool]]
     shortExit: Optional[List[bool]]
-    orderType: str = "limit"
     tpStop: float
     slStop: float
     tslStop: float
     leverage: int
-    size_type: SizeTypeT
+    sizeType: SizeTypeT
     size: float
+    startCash: float
+    fees: float
+    orderType: str = "limit"

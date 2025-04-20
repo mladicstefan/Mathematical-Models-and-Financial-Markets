@@ -38,7 +38,7 @@ class DataFetcher:
                     end=params.end_date,
                     timeframe=params.timeframe,
                 )
-                logging.info(f"Fetched {params.asset} data:\n{self.data}")
+
                 return self.data
 
             except YFRateLimitError:

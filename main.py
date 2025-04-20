@@ -5,6 +5,7 @@ from typing_ import BacktestParameters
 from vectorbtpro.portfolio.enums import SizeType
 from indicators import IndicatorGenerator
 import pandas as pd
+from plotting import plot_results
 
 
 def main():
@@ -56,7 +57,7 @@ def main():
     result = btm.run()
     logging.info("Portfolio stats:\n%s", result.stats())
     logging.info(f"Plotting Reulsts")
-    # btm.plot.show()
+    plot_results(result)
 
 
 if __name__ == "__main__":

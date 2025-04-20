@@ -2,7 +2,7 @@ from vectorbtpro.data.custom import YFData, BinanceData
 from typing import Union
 from datetime import datetime
 import pandas as pd
-from dataclasses import dataclass
+from typing_ import DataParameters
 from yfinance.exceptions import YFRateLimitError
 from time import sleep
 import logging
@@ -13,28 +13,20 @@ DateLike = Union[str, datetime, pd.Timestamp]
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
-@dataclass
-class Parameters:
-    asset: str
-    timeframe: str
-    start_date: pd.Timestamp
-    end_date: pd.Timestamp
-
-
 class DataFetcher:
     def __init__(self, is_stock: bool):
         self.is_stock = is_stock
         self.data = None
 
-    def input(self) -> Parameters:
+    def input(self) -> DataParameters:
 
         asset = "SPY"
         timeframe = "1d"
         start_date = pd.to_datetime("2025-01-01")
         end_date = pd.to_datetime("2025-02-02")
-        return Parameters(asset, timeframe, start_date, end_date)
+        return DataParameters(asset, timeframe, start_date, end_date)
 
-    def fetch_data(self, params: Parameters):
+    def fetch_data(self, params: DataParameters):
 
         src = YFData if self.is_stock else BinanceData
         for attempt in range(1, 4):

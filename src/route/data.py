@@ -20,9 +20,9 @@ class DataFetcher:
 
     def input(self) -> DataParameters:
 
-        asset = "SPY"
+        asset = "BTCUSDT"
         timeframe = "1d"
-        start_date = pd.to_datetime("2025-01-01")
+        start_date = pd.to_datetime("2024-01-01")
         end_date = pd.to_datetime("2025-02-02")
         return DataParameters(asset, timeframe, start_date, end_date)
 

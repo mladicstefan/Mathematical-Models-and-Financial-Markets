@@ -26,9 +26,9 @@ class BacktestParameters:
     shortEntry: Optional[List[bool]]
     longExit: Optional[List[bool]]
     shortExit: Optional[List[bool]]
-    tpStop: float
-    slStop: float
-    tslStop: float
+    tpStop: Optional[float]
+    slStop: Optional[float]
+    tslStop: Optional[float]
     leverage: int
     sizeType: SizeTypeT
     size: float

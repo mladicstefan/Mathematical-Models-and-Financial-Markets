@@ -7,13 +7,16 @@ from route.indicators import IndicatorGenerator
 import pandas as pd
 from route.plotting import plot_results
 from strategies.ta import StrategyTA
+from strategies.dca import StrategyDCA
+import numpy as np
+import vectorbtpro as vbt
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
 
 def main():
 
-    fetcher = DataFetcher(is_stock=True)
+    fetcher = DataFetcher(is_stock=False)
     params = fetcher.input()
     logging.info(f"Fetching data for {params.asset}...")
 
@@ -21,8 +24,11 @@ def main():
     data = yfdata.data[params.asset]
     logging.info(f"Loading Strategy...")
 
-    long_entries, short_entries, long_exits, short_exits = StrategyTA(
-        IndicatorGenerator(data)
+    # long_entries, short_entries, long_exits, short_exits = StrategyTA(
+    #     IndicatorGenerator(data)
+    # ).generate_signals()
+    long_entries, short_entries, long_exits, short_exits = StrategyDCA(
+        data
     ).generate_signals()
 
     logging.info(f"Loading Paramaters...")
@@ -33,9 +39,9 @@ def main():
         longExit=long_exits,
         shortExit=short_exits,
         orderType="limit",
-        tpStop=1.0,
-        slStop=1.0,
-        tslStop=0.5,
+        tpStop=5,
+        slStop=5,
+        tslStop=5,
         leverage=1,
         sizeType=SizeType.Percent100,
         size=10.0,

@@ -2,6 +2,7 @@ from typing_ import BacktestParameters
 from vectorbtpro.portfolio.enums import SizeType
 from vectorbtpro.portfolio.base import PortfolioResultT, Portfolio
 import pandas as pd
+from typing import Optional
 
 
 class BacktestMaker:
@@ -21,12 +22,12 @@ class BacktestMaker:
             low=self.data.get("Low"),
             close=self.data.get("Close"),
             order_type=int(self.params.orderType == "limit"),
-            fees=float(self.params.fees) / 100,
-            init_cash=float(self.params.startCash),
-            tp_stop=float(self.params.tpStop) / 100,
-            sl_stop=float(self.params.slStop) / 100,
-            tsl_stop=float(self.params.tslStop) / 100,
-            leverage=float(self.params.leverage),
+            fees=self.params.fees / 100,
+            init_cash=self.params.startCash,
+            tp_stop=self.params.tpStop / 100 if not None else None,
+            sl_stop=self.params.slStop / 100 if not None else None,
+            tsl_stop=self.params.tslStop / 100 if not None else None,
+            leverage=self.params.leverage,
             size_type=SizeType.Percent100,
             size=10.0,
         )

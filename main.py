@@ -1,11 +1,12 @@
 import logging
-from src.route.data import DataFetcher
-from src.route.portfolio import BacktestMaker
+from route.data import DataFetcher
+from route.portfolio import BacktestMaker
 from typing_ import BacktestParameters
 from vectorbtpro.portfolio.enums import SizeType
-from src.route.indicators import IndicatorGenerator
+from route.indicators import IndicatorGenerator
 import pandas as pd
-from src.route.plotting import plot_results
+from route.plotting import plot_results
+from strategies.ta import StrategyTA
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
@@ -20,26 +21,17 @@ def main():
     data = yfdata.data[params.asset]
     logging.info(f"Loading Strategy...")
 
-    sg = IndicatorGenerator(data)
-    signals = sg.run_indicators(
-        {
-            "SMA": {"timeperiod": 14},
-            "RSI": {"timeperiod": 14},
-        }
-    )
-    sma_series = signals["SMA"].sma
-    long_entries = sma_series > sma_series.shift(1)
-    long_exits = sma_series < sma_series.shift(1)
-    short_entries = sma_series < sma_series.shift(1)
-    short_exits = sma_series > sma_series.shift(1)
+    long_entries, short_entries, long_exits, short_exits = StrategyTA(
+        IndicatorGenerator(data)
+    ).generate_signals()
 
     logging.info(f"Loading Paramaters...")
     bt_params = BacktestParameters(
         data=data,
-        longEntry=long_entries.values.tolist(),
-        shortEntry=short_entries.values.tolist(),
-        longExit=long_exits.values.tolist(),
-        shortExit=short_exits.values.tolist(),
+        longEntry=long_entries,
+        shortEntry=short_entries,
+        longExit=long_exits,
+        shortExit=short_exits,
         orderType="limit",
         tpStop=1.0,
         slStop=1.0,

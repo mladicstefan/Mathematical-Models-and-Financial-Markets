@@ -1,4 +1,4 @@
-# Mathematical Models and Financial Markets
+# Math and Finance
 ---
 
 ## 📂 Repository Structure

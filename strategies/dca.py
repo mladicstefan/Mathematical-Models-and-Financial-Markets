@@ -9,7 +9,6 @@ class StrategyDCA:
     """
 
     def __init__(self, price: DataFrame):
-        price = price["Close"]
         idx = price.index
 
         # Mark True whenever the day-of-month == 1

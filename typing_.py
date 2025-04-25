@@ -12,7 +12,7 @@ class IndicatorData:
 
 @dataclass
 class DataParameters:
-    asset: str
+    assets: List[str]
     timeframe: str
     start_date: pd.Timestamp
     end_date: pd.Timestamp
@@ -20,7 +20,7 @@ class DataParameters:
 
 @dataclass
 class BacktestParameters:
-    data: Union[YFData, BinanceData]
+    data: Union[YFData, BinanceData, List[pd.DataFrame]]
 
     longEntry: List[bool]
     shortEntry: Optional[List[bool]]

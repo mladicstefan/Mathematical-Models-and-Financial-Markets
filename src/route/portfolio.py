@@ -17,10 +17,7 @@ class BacktestMaker:
         self.shortExits = params.shortExit
 
         self.pf_config = dict(
-            open=self.data.get("Open"),
-            high=self.data.get("High"),
-            low=self.data.get("Low"),
-            close=self.data.get("Close"),
+            close=self.data,
             order_type=int(self.params.orderType == "limit"),
             fees=self.params.fees / 100,
             init_cash=self.params.startCash,

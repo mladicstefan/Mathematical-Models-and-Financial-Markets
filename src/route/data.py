@@ -7,10 +7,10 @@ from yfinance.exceptions import YFRateLimitError
 from time import sleep
 import logging
 from binance.exceptions import BinanceRequestException
-
-DateLike = Union[str, datetime, pd.Timestamp]
+from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+DATA_DIR = Path("data")
 
 
 class DataFetcher:
@@ -20,35 +20,48 @@ class DataFetcher:
 
     def input(self) -> DataParameters:
 
-        asset = "BTCUSDT"
+        assets = ["^VIX", "^GSPC", "GC=F"]
         timeframe = "1d"
         start_date = pd.to_datetime("2024-01-01")
         end_date = pd.to_datetime("2025-02-02")
-        return DataParameters(asset, timeframe, start_date, end_date)
+        return DataParameters(assets, timeframe, start_date, end_date)
 
-    def fetch_data(self, params: DataParameters):
+    def cache_data(
+        self, data: Union[pd.Series, pd.DataFrame], ticker: str, pkl_path: Path
+    ):
+        series = data.copy()
+        series.name = ticker
+        series.to_pickle(pkl_path)
 
+    def fetch_data(self, params: DataParameters) -> dict[str, pd.DataFrame]:
+        DATA_DIR.mkdir(exist_ok=True)
         src = YFData if self.is_stock else BinanceData
-        for attempt in range(1, 4):
-
-            try:
-                self.data = src.fetch(
-                    params.asset,
-                    start=params.start_date,
-                    end=params.end_date,
-                    timeframe=params.timeframe,
-                )
-
-                return self.data
-
-            except YFRateLimitError:
-                wait = 30 * (attempt + 1)
-                logging.INFO(f"Rate limited waiting {wait}")
-                sleep(wait)
-
-            except BinanceRequestException:
-                wait = 30 * (attempt + 1)
-                logging.INFO(f"Rate limited waiting {wait}")
-                sleep(wait)
-
-        raise RuntimeError(f"Failed to fetch data for {params.asset} after 3 attempts")
+        dfs = {}
+        for asset in params.assets:
+            symbol = asset.lstrip("^").replace("=", "_")
+            pkl_path = DATA_DIR / f"{symbol}.pkl"
+            if pkl_path.is_file():
+                df = pd.read_pickle(pkl_path)
+            else:
+                for attempt in range(1, 4):
+                    try:
+                        df = src.fetch(
+                            asset,
+                            start=params.start_date,
+                            end=params.end_date,
+                            timeframe=params.timeframe,
+                        )
+                        df.to_pickle(pkl_path)
+                        break
+                    except (YFRateLimitError, BinanceRequestException):
+                        sleep(30 * attempt)
+                else:
+                    raise RuntimeError(f"Failed to fetch {asset}")
+            if isinstance(df, pd.Series):
+                df = df.to_frame(asset)
+            elif "Close" in df.columns:
+                df = df["Close"].to_frame(asset)
+            else:
+                df.columns = [asset]
+            dfs[asset] = df
+        return dfs

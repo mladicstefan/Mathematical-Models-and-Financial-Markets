@@ -6,54 +6,62 @@ from vectorbtpro.portfolio.enums import SizeType
 from route.indicators import IndicatorGenerator
 import pandas as pd
 from route.plotting import plot_results
-from strategies.ta import StrategyTA
-from strategies.dca import StrategyDCA
+from strategies.ToU import StrategyToU
 import numpy as np
 import vectorbtpro as vbt
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
-
 
 def main():
-
     fetcher = DataFetcher(is_stock=False)
     params = fetcher.input()
     logging.info(f"Fetching data for {params.assets}...")
-
-    data = fetcher.fetch_data(params)
-    logging.info(f"Loading Strategy...")
     data_dict = fetcher.fetch_data(params)
-    logging.info(data_dict)
-    for asset, data in data_dict.items():
-        long_entries, short_entries, long_exits, short_exits = StrategyDCA(
-            data
-        ).generate_signals()
+    print(params.assets)
+    print(data_dict)
+    strat = StrategyToU(params.assets, data_dict)
+    long_entries, long_exits = strat.generate_signals()
 
-        logging.info(f"Loading Paramaters...")
-        bt_params = BacktestParameters(
-            data=data,
-            longEntry=long_entries,
-            shortEntry=short_entries,
-            longExit=long_exits,
-            shortExit=short_exits,
-            orderType="limit",
-            tpStop=5,
-            slStop=5,
-            tslStop=5,
-            leverage=1,
-            sizeType=SizeType.Percent100,
-            size=10.0,
-            startCash=10_000,
-            fees=0.04,
-        )
+    from vectorbtpro.portfolio.enums import SizeType
 
-        logging.info(f"Running backtest")
-        btm = BacktestMaker(bt_params, hasOptimizationsEnabled=False)
-        result = btm.run()
+    pf_spx = vbt.Portfolio.from_holding(
+        close=data_dict["^GSPC"],
+        size=100.0,  # 100 %
+        size_type=SizeType.ValuePercent,
+        init_cash=10_000,
+        close_at_end=True,
+    )
 
-        logging.info("Portfolio stats:\n%s", result.stats())
-        logging.info(f"Plotting Reulsts")
-        plot_results(result)
+    # pf_gold = vbt.Portfolio.from_holding(
+    #     close=data_dict["GC=F"],
+    #     size=100.0,  # 100 %
+    #     size_type=SizeType.ValuePercent,
+    #     init_cash=10_000,
+    #     close_at_end=True,
+    # )
+
+    pf_vix = vbt.Portfolio.from_signals(
+        close=data_dict["^VIX"],
+        entries=long_entries["^VIX"],
+        exits=long_exits["^VIX"],
+        direction="longonly",
+        size=100.0,
+        size_type=SizeType.ValuePercent,
+        init_cash=10_000,
+        fees=0.04,
+    )
+    # pf_vix = vbt.Portfolio.from_holding(
+    #     close=data_dict["^VIX"],
+    #     size=100.0,  # 100 %
+    #     size_type=SizeType.ValuePercent,
+    #     init_cash=10_000,
+    #     close_at_end=True,
+    # )
+    print(pf_vix.stats())
+    pf_vix.plot().show()
+    pf_vix.plots(subplots=["value", "cumulative_returns"], per_column=False).show()
+    # combined_pf = vbt.Portfolio.column_stack(pf_spx, pf_gold, pf_vix, group_by=True)
+    # print(combined_pf.stats())
+    # combined_pf.plots(subplots=["value", "cumulative_returns"], per_column=False).show()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,5 @@
 from vectorbtpro.data.custom import YFData, BinanceData
 from typing import Union
-from datetime import datetime
 import pandas as pd
 from typing_ import DataParameters
 from yfinance.exceptions import YFRateLimitError
@@ -57,6 +56,7 @@ class DataFetcher:
                         sleep(30 * attempt)
                 else:
                     raise RuntimeError(f"Failed to fetch {asset}")
+
             if isinstance(df, pd.Series):
                 df = df.to_frame(asset)
             elif "Close" in df.columns:

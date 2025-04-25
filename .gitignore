@@ -11,6 +11,7 @@ pendulum
 
 
 # Distribution / packaging
+*.pkl
 playground.py
 .Python
 build/

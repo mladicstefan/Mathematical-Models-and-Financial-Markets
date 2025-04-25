@@ -11,6 +11,7 @@ pendulum
 
 
 # Distribution / packaging
+playground.py
 .Python
 build/
 develop-eggs/
